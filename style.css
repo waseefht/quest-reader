@@ -1,0 +1,14 @@
+*{box-sizing:border-box}body{margin:0;background:#111418;color:#e8eaed;font:24px/1.7 system-ui,"Segoe UI",Tahoma,sans-serif}
+header{display:flex;justify-content:space-between;align-items:center;padding:12px 24px;background:#1b1f24;flex-wrap:wrap;gap:10px}h1{margin:0;font-size:34px}h2{font-size:30px}
+main{max-width:1100px;margin:auto;padding:20px}textarea{width:100%;min-height:35vh;font-size:28px;line-height:1.7;background:#1b1f24;color:#fff;border:2px solid #333a44;border-radius:16px;padding:18px}
+input[type=url],input[type=text]{width:100%;font-size:24px;min-height:64px;background:#262c34;color:#fff;border:2px solid #3b4450;border-radius:12px;padding:8px;direction:ltr}
+.row{display:flex;flex-wrap:wrap;gap:14px;margin:16px 0}.btn,button{min-height:72px;min-width:72px;padding:12px 26px;font-size:26px;border-radius:18px;border:2px solid #3b4450;background:#262c34;color:#fff;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px}
+.btn:hover,button:hover,.btn:focus-visible,button:focus-visible{border-color:#58a6ff;outline:3px solid #58a6ff55}.btn.small{min-height:56px;font-size:20px}
+.primary{background:#1f6feb}.danger{background:#a4282c}.card,.settings{display:grid;gap:18px;background:#1b1f24;padding:20px;border-radius:16px;margin:18px 0}
+select{font-size:24px;min-height:60px;width:100%;background:#262c34;color:#fff;border-radius:12px;margin-top:6px}input[type=range]{width:100%;height:44px;accent-color:#58a6ff}input[type=checkbox]{width:32px;height:32px;vertical-align:middle}
+#view{font-size:32px;line-height:1.9;background:#1b1f24;padding:24px;border-radius:16px;max-height:55vh;overflow:auto}
+.s{border-radius:8px;cursor:pointer;transition:background .2s}.s:hover{background:#2f81f733}.s.on{background:#e3b341;color:#111}
+.hint{color:#9aa4b2;font-size:22px}.warn{background:#a4282c;padding:20px;margin:20px;border-radius:14px;font-size:26px}
+#bubble{position:absolute;z-index:99;display:flex;gap:8px;background:#1f2937;border:2px solid #58a6ff;border-radius:40px;padding:8px;box-shadow:0 8px 30px #000a}#bubble button{min-height:64px;min-width:64px;padding:0;border-radius:50%;font-size:28px;justify-content:center}#bubble[hidden]{display:none}
+.code{width:100%;min-height:120px;font:14px monospace;direction:ltr;background:#0b0d10;color:#9fe;border-radius:10px;padding:10px}
+a.bm{background:#238636}video{width:100%;max-width:900px;border-radius:12px;background:#000}ol li{margin:6px 0}

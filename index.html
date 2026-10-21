@@ -1,0 +1,26 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#111418">
+<title>قارئ النصوص</title><link rel="manifest" href="manifest.json"><link rel="icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="style.css"></head><body>
+<header><h1>🔊 قارئ النصوص والترجمات</h1><nav class="row"><a class="btn small primary" href="install.html">⭐ الإضافات (Bookmarklets)</a><a class="btn small primary" href="vr/index.html">🥽 مشغّل فيديو VR</a><a class="btn small" href="test.html">🎬 تجربة قراءة الترجمة</a></nav></header>
+<div id="nosupport" class="warn" hidden>عذرًا، هذا المتصفح لا يدعم تحويل النص إلى كلام (speechSynthesis). جرّب تحديث متصفح Quest أو متصفحًا آخر.</div>
+<main><section class="card"><h2>🌐 فتح موقع مع قارئ الترجمة تلقائيًا (عبر Worker)</h2>
+<label>رابط الـ Worker<input type="url" id="workerUrl" placeholder="https://my-reader.xxx.workers.dev"></label>
+<label>رابط الموقع<input type="url" id="siteUrl" placeholder="https://example.com/video"></label>
+<button id="openProxy" class="btn primary">🚀 فتح عبر القارئ</button><p class="hint">راجع README لنشر الـ Worker مجانًا. للاستخدام الشخصي فقط.</p></section>
+<h2>📄 قراءة نص</h2>
+<section id="editSec"><textarea id="txt" dir="auto" placeholder="الصق النص هنا أو اكتبه… / Paste text here"></textarea>
+<div class="row"><button id="doneBtn" class="btn primary">📖 عرض للقراءة بالإشارة</button>
+<label class="btn">📂 فتح ملف txt<input type="file" id="file" accept=".txt,text/plain" hidden></label></div></section>
+<section id="viewSec" hidden><p class="hint">أشِر إلى جملة (انتظر لحظة) أو انقر عليها، أو حدّد نصًا — ستظهر فقاعة وتُقرأ الجملة فقط.</p>
+<div id="view" dir="auto"></div><div class="row"><button id="editBtn" class="btn">✏️ تعديل النص</button></div></section>
+<section class="row controls"><button id="readBtn" class="btn primary">▶️ قراءة الكل</button>
+<button id="pauseBtn" class="btn">⏸️ إيقاف مؤقت</button><button id="stopBtn" class="btn danger">⏹️ إيقاف</button></section>
+<section class="settings"><label>الصوت<select id="voice"></select></label>
+<label><input type="checkbox" id="autoVoice" checked> اختيار الصوت تلقائيًا حسب لغة النص</label>
+<label>السرعة <span id="rateV"></span><input type="range" id="rate" min="0.5" max="2" step="0.1" value="1"></label>
+<label>طبقة الصوت <span id="pitchV"></span><input type="range" id="pitch" min="0.5" max="2" step="0.1" value="1"></label>
+<label><input type="checkbox" id="dwell" checked> القراءة عند الإشارة والانتظار (600ms)</label></section>
+</main>
+<div id="bubble" hidden><button id="bPlay" aria-label="قراءة">▶️</button><button id="bStop" aria-label="إيقاف">⏹️</button><button id="bClose" aria-label="إغلاق">✕</button></div>
+<script src="app.js"></script></body></html>

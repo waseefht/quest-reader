@@ -1,0 +1,12 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>تجربة قارئ الترجمة</title><link rel="stylesheet" href="style.css"></head><body>
+<header><h1>🎬 تجربة قارئ الترجمة</h1><a class="btn small" href="index.html">الرئيسية</a></header><main>
+<p class="hint">1) اضغط «تشغيل القارئ» 2) شغّل الفيديو. يقرأ القارئ ترجمة VTT، وزر «تجربة ترجمة DOM» يعرض ترجمة نصية في الصفحة ويضع الصندوق فوقها.</p>
+<div class="row"><button id="go" class="btn primary">🔊 تشغيل القارئ</button><button id="domBtn" class="btn">📝 تجربة ترجمة DOM</button></div>
+<video id="v" controls playsinline src="sample.webm"><track kind="subtitles" src="sample.vtt" srclang="ar" label="عربي/English" default></video>
+<div id="domsub" class="subtitle" style="font-size:30px;text-align:center;min-height:50px;margin-top:10px"></div>
+</main><script>
+document.getElementById('go').onclick=function(){if(window.__QSR)return;var s=document.createElement('script');s.src='overlay.js';document.body.appendChild(s);};
+document.getElementById('domBtn').onclick=function(){var L=['هذا سطر ترجمة معروض في الصفحة.','This line is rendered in the DOM.','انتهت التجربة.'],i=0,d=document.getElementById('domsub');
+d.scrollIntoView();var r=d.getBoundingClientRect();if(window.__QSR){var c=__QSR.cfg;c.x=r.left;c.y=r.top-10;c.w=r.width;c.h=r.height+20;__QSR.place();}
+(function n(){d.textContent=L[i++]||'';if(i<=L.length)setTimeout(n,2500);})();};
+</script></body></html>

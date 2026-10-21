@@ -1,0 +1,17 @@
+import assert from 'node:assert';
+import { proxify, targetFrom, rewriteText, rewriteSrcset } from './rewrite.js';
+const O='https://w.dev', B='https://site.com/a/page.html?x=1';
+assert.equal(proxify('/img/p.png',B,O),'https://w.dev/https://site.com/img/p.png');
+assert.equal(proxify('b.html',B,O),'https://w.dev/https://site.com/a/b.html');
+assert.equal(proxify('//cdn.x.com/s.js',B,O),'https://w.dev/https://cdn.x.com/s.js');
+assert.equal(proxify('https://other.org/q?a=1#h',B,O),'https://w.dev/https://other.org/q?a=1#h');
+assert.equal(proxify('#top',B,O),'#top'); assert.equal(proxify('javascript:void 0',B,O),'javascript:void 0');
+assert.equal(proxify('https://w.dev/https://x.com/',B,O),'https://w.dev/https://x.com/');
+assert.equal(targetFrom('https://w.dev/https://site.com/v?id=3').href,'https://site.com/v?id=3');
+assert.equal(targetFrom('https://w.dev/https:/site.com/').href,'https://site.com/');
+assert.equal(targetFrom('https://w.dev/style.css'),null);
+assert.equal(rewriteSrcset('a.jpg 1x, /b.jpg 2x',B,O),'https://w.dev/https://site.com/a/a.jpg 1x, https://w.dev/https://site.com/b.jpg 2x');
+const m=rewriteText('#EXTM3U\n#EXT-X-KEY:METHOD=AES-128,URI="k.key"\nseg1.ts\nhttps://c.com/s2.ts',B,O);
+assert.ok(m.includes('URI="https://w.dev/https://site.com/a/k.key"')&&m.includes('https://w.dev/https://site.com/a/seg1.ts')&&m.includes('https://w.dev/https://c.com/s2.ts'));
+const v=rewriteText('WEBVTT\n\n00:00.000 --> 00:01.000\nHello world.',B,O); assert.ok(v.endsWith('Hello world.'));
+console.log('all rewrite tests passed');

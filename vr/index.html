@@ -1,0 +1,17 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>مشغّل فيديو VR</title><link rel="stylesheet" href="../style.css"><style>#ui{max-width:1100px;margin:auto;padding:16px}canvas{display:block}#stage{width:100%;height:50vh;background:#000;border-radius:12px;overflow:hidden}#sub2d{font-size:30px;text-align:center;min-height:50px}</style></head><body>
+<header><h1>🥽 مشغّل فيديو VR</h1><a class="btn small" href="../index.html">الرئيسية</a></header>
+<div id="ui"><button id="bigEnter" class="btn primary" hidden style="width:100%;min-height:160px;font-size:48px;margin:10px 0">🥽 دخول VR وتشغيل الفيديو</button>
+<div id="noxr" class="warn" hidden>هذا المتصفح لا يدعم WebXR (immersive-vr). استخدم Meta Quest Browser عبر HTTPS. يمكنك المعاينة ثنائية الأبعاد هنا.</div>
+<div class="row"><label class="btn">📂 فيديو من الجهاز<input type="file" id="vfile" accept="video/*" hidden></label>
+<label class="btn">💬 ترجمة .vtt/.srt<input type="file" id="sfile" accept=".vtt,.srt,text/vtt" hidden></label></div>
+<div class="row"><input type="url" id="vurl" placeholder="https://.../video.mp4 (يتطلب CORS)" style="flex:1"><button id="loadUrl" class="btn">تحميل الرابط</button></div>
+<div class="row"><label style="flex:1">الصيغة<select id="fmt">
+<option value="flat">شاشة سينما مسطحة 2D</option><option value="360">360 أحادي</option><option value="180">180 أحادي</option>
+<option value="360sbs">360 ستيريو جنبًا لجنب SBS</option><option value="360tb">360 ستيريو أعلى/أسفل TB</option>
+<option value="180sbs">180 ستيريو SBS</option><option value="180tb">180 ستيريو TB</option></select></label>
+<label><input type="checkbox" id="speak" checked> قراءة الترجمة بصوت</label></div>
+<div class="row"><button id="enter" class="btn primary">🥽 دخول VR</button><button id="play" class="btn">▶️/⏸️</button><button id="recenter" class="btn">🎯 إعادة التوسيط</button></div>
+<div id="stage"></div><div id="sub2d"></div><p id="status" class="hint"></p>
+<p class="hint">في VR: الزناد = تشغيل/إيقاف (أو الضغط على أزرار اللوحة)، عصا التحكم يمين/يسار = تقديم/ترجيع 10ث، زر A/X أو القبضة = إظهار/إخفاء اللوحة.</p>
+</div><script type="module" src="vr.js"></script></body></html>

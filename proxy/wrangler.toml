@@ -1,0 +1,8 @@
+name = "quest-subtitle-reader"
+main = "worker.js"
+compatibility_date = "2024-09-23"
+
+[[rules]]
+type = "Text"
+globs = ["**/*.txt"]
+fallthrough = true
