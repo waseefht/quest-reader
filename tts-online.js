@@ -47,5 +47,46 @@ function waitVoices(SS,cb){var fired=0;function chk(force){var l=SS?SS.getVoices
  if(!SS){setTimeout(function(){cb([]);},0);return;}chk();try{SS.addEventListener('voiceschanged',function(){chk(1);});}catch(e){}
  var tap=function(){try{SS.speak(new SpeechSynthesisUtterance(''));}catch(e){}setTimeout(function(){chk(1);},300);};W.addEventListener('pointerdown',tap,{once:true,capture:true});
  setTimeout(function(){chk(1);},1500);}
-W.QOTTS={voices:V,speak:speak,cancel:cancel,chunk:chunk,url:url,byId:byId,forLang:forLang,waitVoices:waitVoices,isOn:function(id){return /^g:/.test(id||'');},speaking:function(){return !!cur;},cfg:DC,duck:duck,fitRate:fitRate,estDur:estDur,mode:function(){return !waBad&&DC.base&&(W.AudioContext||W.webkitAudioContext)?'webaudio':'duck-only';},stats:stats,ac:function(){return AC;}};
+
+/* ---- translation to Arabic (unofficial free Google endpoints; text is sent to Google) ---- */
+var TC=new Map();function tget(k){if(!TC.has(k))return;var v=TC.get(k);TC.delete(k);TC.set(k,v);return v;}function tset(k,v){TC.set(k,v);while(TC.size>200)TC.delete(TC.keys().next().value);}
+var EP=[function(qs,tl){return 'https://clients5.google.com/translate_a/t?client=dict-chrome-ex&sl=auto&tl='+tl+qs.map(function(q){return '&q='+encodeURIComponent(q);}).join('');},
+ function(qs,tl){return DC.base?DC.base.replace(/\/+$/,'')+'/__tr?tl='+tl+qs.map(function(q){return '&q='+encodeURIComponent(q);}).join(''):null;}];
+function parseT(j,n){var out=[];if(!Array.isArray(j))return null;if(n==1&&typeof j[0]=='string')return [j[0]];for(var i=0;i<j.length;i++){var x=j[i];out.push(Array.isArray(x)?String(x[0]):String(x));}return out.length==n?out:null;}
+function fetchT(qs,tl,ei){ei=ei||0;var u=EP[ei]&&EP[ei](qs,tl);if(!u)return Promise.reject(new Error('translate-failed'));
+ return fetch(u,{referrerPolicy:'no-referrer',credentials:'omit'}).then(function(r){if(!r.ok)throw new Error('http '+r.status);return r.json();}).then(function(j){var o=parseT(j,qs.length);if(!o)throw new Error('bad');return o;}).catch(function(e){if(ei+1<EP.length)return fetchT(qs,tl,ei+1);throw e;});}
+var pend={};
+function translate(list,tl){tl=tl||'ar';var single=typeof list=='string';list=single?[list]:list.slice();var res=new Array(list.length),need=[],idx=[],ps=[];
+ list.forEach(function(t,i){var k=tl+'|'+t,c=tget(k);if(c!=null)res[i]=c;else if(pend[k])ps.push(pend[k].then(function(v){res[i]=v;}));else{need.push(t);idx.push(i);}});
+ var batches=[],b=[],len=0;need.forEach(function(t,j){if(b.length&&(len+t.length>1500||b.length>=20)){batches.push(b);b=[];len=0;}b.push(j);len+=t.length+10;});if(b.length)batches.push(b);
+ batches.forEach(function(bb){var qs=bb.map(function(j){return need[j];}),p=fetchT(qs,tl).then(function(o){bb.forEach(function(j,n){tset(tl+'|'+need[j],o[n]);res[idx[j]]=o[n];delete pend[tl+'|'+need[j]];});},function(e){bb.forEach(function(j){delete pend[tl+'|'+need[j]];});throw e;});
+  bb.forEach(function(j,n){pend[tl+'|'+need[j]]=p.then(function(){return res[idx[j]];});});ps.push(p);});
+ return Promise.all(ps).then(function(){return single?res[0]:res;});}
+function isAr(t){var a=(String(t).match(/[\u0600-\u06FF]/g)||[]).length,l=(String(t).match(/[A-Za-z\u00C0-\u024F\u0400-\u04FF]/g)||[]).length;return a>0&&a>=l;}
+
+/* ---- listen mode: speech-to-text when a video has no text subtitles ---- */
+var LS={on:false};
+function sttOpenAI(blob,o){var fd=new FormData();fd.append('file',blob,'seg.webm');fd.append('model',o.model||'gpt-4o-mini-transcribe');fd.append('response_format','json');
+ return fetch('https://api.openai.com/v1/audio/transcriptions',{method:'POST',headers:{Authorization:'Bearer '+o.key},body:fd}).then(function(r){if(!r.ok)throw new Error(r.status==401?'auth':'http '+r.status);return r.json();}).then(function(j){return (j.text||'').trim();});}
+function dedup(prev,t){var a=prev.split(/\s+/),b=t.split(/\s+/);for(var n=Math.min(a.length,b.length,8);n>0;n--){if(a.slice(-n).join(' ').toLowerCase()==b.slice(0,n).join(' ').toLowerCase())return b.slice(n).join(' ');}return t;}
+function capture(v){var f=v.captureStream||v.mozCaptureStream;if(!f)return {err:'nosupport'};if(v.mediaKeys)return {err:'drm'};try{var ms=f.call(v),at=ms.getAudioTracks();if(!at.length)return {err:'noaudio'};return {stream:new MediaStream(at)};}catch(e){return {err:/secur|cross|origin/i.test(e.message+e.name)?'cors':'fail',e:e};}}
+function listen(v,o){stopListen();o=o||{};var st=o.onStatus||function(){},seg=+o.seg||5,ov=0.6,prev='',recs=[],timer=0,me=LS={on:true,mode:null,v:v,stop:null,segs:0};
+ var stt=W.QOTTS.stt||(o.key?function(b){return sttOpenAI(b,o);}:null),c=stt?capture(v):{err:'nokey'};
+ if(c.stream&&typeof MediaRecorder!='undefined'){me.mode='capture';var mime=['audio/webm;codecs=opus','audio/webm','audio/mp4'].filter(function(m){return MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(m);})[0]||'';
+  function startRec(){if(!me.on||v.paused)return;var r,parts=[],t0=v.currentTime;try{r=new MediaRecorder(c.stream,mime?{mimeType:mime}:undefined);}catch(e){st('err',e);return;}
+   r.ondataavailable=function(e){if(e.data&&e.data.size)parts.push(e.data);};r.onstop=function(){recs=recs.filter(function(x){return x!==r;});if(!parts.length)return;var b=new Blob(parts,{type:r.mimeType||'audio/webm'}),t1=v.currentTime;me.segs++;
+    stt(b).then(function(t){if(!me.on||!t)return;var d=dedup(prev,t);prev=t;if(d)o.onText&&o.onText(d,{start:t0,end:t1,video:v});},function(e){st('stt-error',e);});};
+   r.start();recs.push(r);me.last=r;timer=setTimeout(function(){startRec();setTimeout(function(){if(r.state!='inactive')r.stop();},ov*1000);},(seg-ov)*1000);}
+  me.onplay=function(){clearTimeout(timer);startRec();};me.onpause=function(){clearTimeout(timer);recs.forEach(function(r){if(r.state!='inactive')r.stop();});};
+  v.addEventListener('play',me.onplay);v.addEventListener('pause',me.onpause);if(!v.paused)startRec();
+  me.stop=function(){me.on=false;clearTimeout(timer);v.removeEventListener('play',me.onplay);v.removeEventListener('pause',me.onpause);recs.forEach(function(r){try{r.stop();}catch(e){}});};st('capture');return me;}
+ var SR=W.SpeechRecognition||W.webkitSpeechRecognition;
+ if(SR&&o.mic!==false){me.mode='mic';var rec=new SR();rec.continuous=true;rec.interimResults=false;rec.lang=o.srcLang||'en-US';
+  rec.onresult=function(e){for(var i=e.resultIndex;i<e.results.length;i++)if(e.results[i].isFinal){var t=e.results[i][0].transcript.trim();if(t&&!v.paused)o.onText&&o.onText(t,{video:v});}};
+  rec.onend=function(){if(me.on)try{rec.start();}catch(e){}};rec.onerror=function(e){if(e.error=='not-allowed'||e.error=='service-not-allowed'){me.on=false;st('mic-denied');}};
+  try{rec.start();}catch(e){st('err',e);}me.stop=function(){me.on=false;try{rec.stop();}catch(e){}};st('mic',c.err);return me;}
+ me.on=false;st('none',c.err);return me;}
+function stopListen(){if(LS&&LS.stop)LS.stop();LS={on:false};}
+var LMSG={capture:'👂 وضع الاستماع: تحويل كلام الفيديو إلى نص ← ترجمة ← دبلجة (تأخير 3–6 ثوانٍ)',mic:'🎤 وضع الاستماع عبر الميكروفون (جودة أقل): يلتقط صوت السماعات',drm:'🔒 الفيديو محمي (DRM) — لا يمكن التقاط صوته',cors:'🔒 الفيديو من مصدر خارجي يمنع التقاط الصوت (CORS)',nokey:'🔑 أدخل مفتاح OpenAI في الإعدادات لتحويل كلام الفيديو إلى نص',nosupport:'⚠️ المتصفح لا يدعم التقاط صوت الفيديو',noaudio:'⚠️ لا يوجد مسار صوت قابل للالتقاط',none:'⚠️ لا يمكن الاستماع: لا التقاط للصوت ولا ميكروفون مدعوم','mic-denied':'🎤 تم رفض إذن الميكروفون','stt-error':'⚠️ فشل تحويل الكلام إلى نص (المفتاح/الشبكة/الرصيد)'};
+W.QOTTS={voices:V,speak:speak,cancel:cancel,chunk:chunk,url:url,byId:byId,forLang:forLang,waitVoices:waitVoices,isOn:function(id){return /^g:/.test(id||'');},speaking:function(){return !!cur;},cfg:DC,duck:duck,listen:listen,stopListen:stopListen,listening:function(){return LS;},LMSG:LMSG,capture:capture,dedup:dedup,bigVideo:bigVideo,translate:translate,isAr:isAr,tcache:TC,fitRate:fitRate,estDur:estDur,mode:function(){return !waBad&&DC.base&&(W.AudioContext||W.webkitAudioContext)?'webaudio':'duck-only';},stats:stats,ac:function(){return AC;}};
 })(window);

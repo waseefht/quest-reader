@@ -1,6 +1,6 @@
 (function(){
 var SS=window.speechSynthesis,$=function(i){return document.getElementById(i);},K='qr_state';
-var st={text:'',rate:1,pitch:1,voice:'',auto:true,dwell:true,worker:'',duck:75,blend:40,spatial:true};try{Object.assign(st,JSON.parse(localStorage.getItem(K)||'{}'));}catch(e){}
+var st={text:'',rate:1,pitch:1,voice:'',auto:true,dwell:true,worker:'',duck:75,blend:40,spatial:true,dub:true,showAr:true,fs:28,listen:true,sttKey:'',sttModel:'gpt-4o-mini-transcribe',srcLang:'en-US',keyInBm:false};try{Object.assign(st,JSON.parse(localStorage.getItem(K)||'{}'));}catch(e){}
 function save(){try{localStorage.setItem(K,JSON.stringify(st));}catch(e){}}
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){});
 var txt=$('txt'),view=$('view'),sel=$('voice'),voices=[],chunks=[],idx=0,playing=false,bubbleText='';
@@ -30,7 +30,9 @@ $('doneBtn').onclick=showView;$('editBtn').onclick=function(){$('stopBtn').oncli
 txt.oninput=function(){st.text=txt.value;save();};
 $('file').onchange=function(){var f=this.files[0];if(!f)return;var r=new FileReader();r.onload=function(){txt.value=r.result;st.text=r.result;save();showView();};r.readAsText(f,'utf-8');};
 sel.onchange=function(){st.voice=sel.value;save();};$('autoVoice').onchange=function(){st.auto=this.checked;save();};$('dwell').onchange=function(){st.dwell=this.checked;save();};
-['duck','blend'].forEach(function(k){$(k).oninput=function(){st[k]=+this.value;lbl();save();};});$('spatial').onchange=function(){st.spatial=this.checked;save();};
+['duck','blend'].forEach(function(k){$(k).oninput=function(){st[k]=+this.value;lbl();save();};});$('dub').value=st.dub?'1':'0';$('showAr').checked=st.showAr;$('fs').value=st.fs;$('fsV').textContent=st.fs;$('dub').onchange=function(){st.dub=this.value=='1';save();};$('showAr').onchange=function(){st.showAr=this.checked;save();};$('fs').oninput=function(){st.fs=+this.value;$('fsV').textContent=st.fs;save();};
+['sttKey','sttModel','srcLang'].forEach(function(k){$(k).value=st[k];$(k).onchange=function(){st[k]=this.value.trim();save();};});['listen','keyInBm'].forEach(function(k){$(k).checked=st[k];$(k).onchange=function(){st[k]=this.checked;save();};});
+$('spatial').onchange=function(){st.spatial=this.checked;save();};
 $('rate').oninput=function(){st.rate=this.value;lbl();save();};$('pitch').oninput=function(){st.pitch=this.value;lbl();save();};
 var bubble=$('bubble'),dwellT=0;
 function readOne(t){if(!t)return;playing=false;stopAll();utter(t,function(){});}

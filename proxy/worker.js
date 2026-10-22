@@ -16,6 +16,10 @@ export default {
   async fetch(request) {
     const url = new URL(request.url), origin = url.origin;
     if (url.pathname === '/__reader.js') return new Response(READER, {headers:{'content-type':'application/javascript; charset=utf-8','cache-control':'max-age=3600','access-control-allow-origin':'*'}});
+    if (url.pathname === '/__tr') { // CORS translation fallback (multiple q allowed)
+      const r=await fetch('https://clients5.google.com/translate_a/t?client=dict-chrome-ex&sl=auto'+url.search.replace(/^\?/,'&'));
+      return new Response(r.body,{status:r.status,headers:{'content-type':'application/json; charset=utf-8','access-control-allow-origin':'*'}});
+    }
     if (url.pathname === '/__tts') { // CORS-enabled TTS so the reader can route the voice through Web Audio
       const q=(url.searchParams.get('q')||'').slice(0,200), tl=(url.searchParams.get('tl')||'ar').slice(0,10);
       const r=await fetch('https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl='+encodeURIComponent(tl)+'&q='+encodeURIComponent(q));

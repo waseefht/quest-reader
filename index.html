@@ -12,6 +12,15 @@
 <label>السرعة <span id="rateV"></span><input type="range" id="rate" min="0.5" max="2" step="0.1" value="1"></label>
 <label>خفض صوت الفيديو أثناء الكلام <span id="duckV"></span>%<input type="range" id="duck" min="0" max="100" value="75"></label>
 <label>الدمج مع صوت الفيديو (صدى خفيف/موازنة/مكان) <span id="blendV"></span>%<input type="range" id="blend" min="0" max="100" value="40"></label>
+<label>الوضع<select id="dub"><option value="1">🇸🇦 دبلجة عربية (ترجمة ثم قراءة بالعربية)</option><option value="0">🗣️ قراءة النص الأصلي</option></select></label>
+<label><input type="checkbox" id="showAr" checked> إظهار النص العربي أسفل الفيديو</label>
+<label>حجم خط الترجمة <span id="fsV"></span><input type="range" id="fs" min="16" max="56" step="2" value="28"></label>
+<label><input type="checkbox" id="listen" checked> 👂 وضع الاستماع تلقائيًا (فيديو بلا ترجمة نصية لمدة 8 ثوانٍ: تحويل الكلام إلى نص ← ترجمة ← دبلجة)</label>
+<label>مفتاح OpenAI لتحويل الكلام إلى نص (اختياري)<input type="password" id="sttKey" placeholder="sk-..." autocomplete="off"></label>
+<label>نموذج التفريغ<select id="sttModel"><option value="gpt-4o-mini-transcribe">gpt-4o-mini-transcribe (أرخص)</option><option value="gpt-4o-transcribe">gpt-4o-transcribe</option><option value="whisper-1">whisper-1</option></select></label>
+<label>لغة الفيديو (لوضع الميكروفون)<select id="srcLang"><option value="en-US">English</option><option value="fr-FR">Français</option><option value="es-ES">Español</option><option value="de-DE">Deutsch</option><option value="tr-TR">Türkçe</option><option value="hi-IN">हिन्दी</option><option value="ko-KR">한국어</option><option value="ja-JP">日本語</option></select></label>
+<label><input type="checkbox" id="keyInBm"> تضمين المفتاح داخل الإضافة (لازم لتعمل على المواقع الأخرى؛ لا تشارك الإضافة مع أحد)</label>
+<p class="hint">المفتاح يُحفظ في هذا المتصفح فقط ويُرسَل صوت الفيديو إلى OpenAI. التفريغ مدفوع بالدقيقة — راجع أسعار OpenAI الحالية. بدون مفتاح: يُستخدم الميكروفون (مجاني، جودة أقل) إن دعمه المتصفح. الفيديو المحمي (DRM) أو من مصدر خارجي لا يمكن التقاط صوته.</p>
 <label><input type="checkbox" id="spatial" checked> صوت مكاني ودمج متقدم (حيث يسمح المتصفح)</label>
 <details class="hint"><summary>ℹ️ كيف يعمل «الدمج»؟ ولماذا صوت الإنترنت؟</summary>أثناء كل جملة يُخفَض صوت الفيديو تدريجيًا (150ms) ثم يعود، وتُضبط سرعة الكلام (0.9–1.6) لينتهي مع نهاية الجملة المترجمة. المؤثرات المتقدمة (صدى غرفة، موازنة، ضاغط، توجيه حسب مكان الفيديو، وخفض ترددات الأصوات الأصلية بدل خفض الصوت كله) تعمل فقط حين يسمح المتصفح بتمرير الصوت عبر Web Audio: عند الفتح عبر الـ Worker أو في مشغّل VR مع Worker. على المواقع العادية: خفض الصوت فقط. متصفح Quest غالبًا بلا أصوات مدمجة، لذا يُستخدم صوت نسائي عبر الإنترنت (Google، يرسل النص إليها). لا يتم استنساخ صوت الممثل.</details></section>
 <section class="card"><h2>🌐 فتح موقع مع قارئ الترجمة تلقائيًا (عبر Worker)</h2>
