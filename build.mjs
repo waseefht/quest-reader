@@ -1,6 +1,10 @@
 // node build.mjs : regenerates bookmarklets, install.html and proxy/worker-single.js from overlay.js
 import fs from 'node:fs';
-const ov = fs.readFileSync('overlay.js','utf8');
+let ov = fs.readFileSync('overlay.js','utf8');
+const tts = fs.readFileSync('tts-online.js','utf8');
+ov = ov.replace(/\/\*QOTTS\*\/[\s\S]*?\/\*\/QOTTS\*\/\n?/,'');
+ov = '/*QOTTS*/'+tts.trim()+'/*/QOTTS*/\n'+ov;
+fs.writeFileSync('overlay.js', ov);
 let min = ov; try { const t = await import('/tmp/pw/node_modules/terser/main.js'); min = (await t.minify(ov,{format:{ascii_only:true}})).code; } catch(e) { min = ov.replace(/\n/g,''); }
 fs.writeFileSync('bookmarklet.js', min + '\n');
 const reader = 'javascript:' + encodeURIComponent(min);
@@ -16,7 +20,7 @@ const esc = s => s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&l
 const block = (title, desc, code) => `<section class="card"><h2>${title}</h2><p>${desc}</p>
 <div class="row"><a class="btn bm" href="${esc(code)}">${title}</a><button class="btn primary" onclick="cp(this)">📋 نسخ الكود</button></div>
 <textarea class="code" readonly>${esc(code)}</textarea></section>`;
-fs.writeFileSync('install.html', `<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>تثبيت الإضافات</title><link rel="stylesheet" href="style.css"></head><body>
+fs.writeFileSync('install.html', `<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="referrer" content="no-referrer"><meta name="viewport" content="width=device-width,initial-scale=1"><title>تثبيت الإضافات</title><link rel="stylesheet" href="style.css"></head><body>
 <header><h1>⭐ إضافات المتصفح (Bookmarklets)</h1><a class="btn small" href="index.html">الرئيسية</a></header><main>
 <section class="card"><h2>كيف أضيف إضافة في Meta Quest Browser؟</h2><ol>
 <li>اضغط «📋 نسخ الكود» تحت الإضافة المطلوبة.</li>

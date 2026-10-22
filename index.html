@@ -1,4 +1,4 @@
-<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8">
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#111418">
 <title>قارئ النصوص</title><link rel="manifest" href="manifest.json"><link rel="icon" href="icons/icon-192.png">
 <link rel="stylesheet" href="style.css"></head><body>
@@ -16,11 +16,11 @@
 <div id="view" dir="auto"></div><div class="row"><button id="editBtn" class="btn">✏️ تعديل النص</button></div></section>
 <section class="row controls"><button id="readBtn" class="btn primary">▶️ قراءة الكل</button>
 <button id="pauseBtn" class="btn">⏸️ إيقاف مؤقت</button><button id="stopBtn" class="btn danger">⏹️ إيقاف</button></section>
-<section class="settings"><label>الصوت<select id="voice"></select></label>
+<section class="settings"><label>الصوت<select id="voice"></select></label><p id="onlineNote" class="hint" hidden>🌐 لا توجد أصوات مدمجة في هذا المتصفح — يُستخدم صوت نسائي عبر الإنترنت.</p><details class="hint"><summary>ℹ️ لماذا يُستخدم صوت الإنترنت؟</summary>متصفح Meta Quest لا يوفّر غالبًا أي صوت مدمج (قائمة الأصوات فارغة). عندها يتحوّل القارئ تلقائيًا بعد ~1.5 ثانية إلى صوت نسائي عبر الإنترنت (خدمة نطق Google Translate، بلا مفتاح) يُشغَّل كملف صوتي. يحتاج اتصالًا بالإنترنت، والنص يُرسَل إلى Google لنطقه. السرعة تعمل، أما «طبقة الصوت» فلا تؤثر عليه. إذا توفرت أصوات الجهاز يمكنك اختيارها من القائمة، ويُستخدم الآخر تلقائيًا عند فشل أحدهما.</details>
 <label><input type="checkbox" id="autoVoice" checked> اختيار الصوت تلقائيًا حسب لغة النص</label>
 <label>السرعة <span id="rateV"></span><input type="range" id="rate" min="0.5" max="2" step="0.1" value="1"></label>
 <label>طبقة الصوت <span id="pitchV"></span><input type="range" id="pitch" min="0.5" max="2" step="0.1" value="1"></label>
 <label><input type="checkbox" id="dwell" checked> القراءة عند الإشارة والانتظار (600ms)</label></section>
 </main>
 <div id="bubble" hidden><button id="bPlay" aria-label="قراءة">▶️</button><button id="bStop" aria-label="إيقاف">⏹️</button><button id="bClose" aria-label="إغلاق">✕</button></div>
-<script src="app.js"></script></body></html>
+<script src="tts-online.js"></script><script src="app.js"></script></body></html>
