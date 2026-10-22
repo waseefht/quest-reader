@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>محوّل الترجمات</title>
+<style>
+body{background:#111418;color:#e8eaed;font-family:system-ui,Tahoma,sans-serif;margin:0;padding:24px;font-size:22px}
+h1{font-size:1.6em}.card{background:#1c2128;border-radius:16px;padding:20px;margin:16px 0}
+label{display:block;margin:12px 0 6px}select,input,button{font-size:1em;padding:16px 20px;border-radius:12px;border:1px solid #3a4250;background:#262c35;color:#e8eaed;min-height:60px}
+button{background:#2b6de0;border:none;cursor:pointer;margin:8px 0 8px 12px;min-width:200px}button.sec{background:#3a4250}
+input[type=file]{width:100%;box-sizing:border-box}pre{white-space:pre-wrap;direction:ltr;text-align:left;background:#0b0d10;padding:12px;border-radius:10px;font-size:16px;max-height:300px;overflow:auto}
+.ok{color:#5fd38d}.bad{color:#ff6b6b}a{color:#7fb0ff}
+</style></head><body>
+<h1>🔄 محوّل الترجمات</h1><a href="index.html">→ الرئيسية</a>
+<div class="card">
+<label>اختر ملف/ملفات ترجمة (.srt .vtt .ass .ssa .sub)</label>
+<input type="file" id="files" multiple accept=".srt,.vtt,.ass,.ssa,.sub,text/plain">
+<label>صيغة الإخراج</label>
+<select id="fmt"><option value="sub">MicroDVD (.sub)</option><option value="srt">SRT</option><option value="vtt">VTT</option></select>
+<label>معدّل الإطارات FPS</label>
+<select id="fps"><option>23.976</option><option>24</option><option>25</option><option>29.97</option><option>30</option></select>
+<label>إزاحة الوقت (مللي ثانية، سالب للتقديم)</label>
+<input type="number" id="shift" value="0" step="100">
+<div><button id="go">⬇️ تحويل وتنزيل</button><button class="sec" id="test">🧪 اختبار ذاتي</button></div>
+</div>
+<div class="card"><div id="status">لم يتم اختيار ملفات.</div><pre id="out"></pre></div>
+<script id="core">
+var SubConv=(function(){
+function stripBom(s){return s.replace(/^\uFEFF/,'');}
+function t2ms(t){t=t.trim().replace(',','.');var p=t.split(':');var s=0;for(var i=0;i<p.length;i++)s=s*60+parseFloat(p[i]);return Math.round(s*1000);}
+function parseSrtVtt(s){var cues=[];s=s.replace(/\r\n?/g,'\n');var blocks=s.split(/\n\s*\n/);
+ for(var b of blocks){var lines=b.split('\n');var i=lines.findIndex(l=>l.indexOf('-->')>=0);if(i<0)continue;
+  var m=lines[i].match(/([\d:.,]+)\s*-->\s*([\d:.,]+)/);if(!m)continue;
+  var text=lines.slice(i+1).join('\n').replace(/<[^>]+>/g,'').trim();if(text)cues.push({start:t2ms(m[1]),end:t2ms(m[2]),text:text});}
+ return cues;}
+function parseAss(s){var cues=[],fmt=null,inEv=false;s=s.replace(/\r\n?/g,'\n');
+ for(var l of s.split('\n')){var t=l.trim();if(/^\[/.test(t)){inEv=/^\[events\]/i.test(t);continue;}if(!inEv)continue;
+  if(/^format:/i.test(t)){fmt=t.slice(7).split(',').map(x=>x.trim().toLowerCase());continue;}
+  if(/^dialogue:/i.test(t)){var f=fmt||['layer','start','end','style','name','marginl','marginr','marginv','effect','text'];
+   var parts=t.slice(9).split(',');var n=f.length;var vals=parts.slice(0,n-1).concat([parts.slice(n-1).join(',')]);var o={};f.forEach((k,j)=>o[k]=(vals[j]||'').trim());
+   var text=o.text.replace(/\{[^}]*\}/g,'').replace(/\\[Nn]/g,'\n').replace(/\\h/g,' ').trim();
+   if(text)cues.push({start:t2ms(o.start),end:t2ms(o.end),text:text});}}
+ return cues.sort((a,b)=>a.start-b.start);}
+function parseSub(s,fps){var cues=[];s=s.replace(/\r\n?/g,'\n');
+ for(var l of s.split('\n')){var m=l.match(/^\{(\d+)\}\{(\d+)\}(.*)$/);if(!m)continue;
+  var a=+m[1],b=+m[2];if(a===1&&b===1&&/^[\d.]+$/.test(m[3].trim())){fps=parseFloat(m[3]);continue;}
+  var text=m[3].replace(/\{[^}]*\}/g,'').replace(/\|/g,'\n').trim();if(text)cues.push({start:Math.round(a*1000/fps),end:Math.round(b*1000/fps),text:text});}
+ return cues;}
+function parse(name,s,fps){s=stripBom(s);var ext=(name.split('.').pop()||'').toLowerCase();
+ if(ext==='ass'||ext==='ssa'||/^\s*\[script info\]/i.test(s))return parseAss(s);
+ if(ext==='sub'&&/^\s*\{\d+\}/.test(s))return parseSub(s,fps);return parseSrtVtt(s);}
+function shift(c,ms){return c.map(x=>({start:Math.max(0,x.start+ms),end:Math.max(0,x.end+ms),text:x.text}));}
+function pad(n,w){return String(n).padStart(w,'0');}
+function fmtT(ms,sep){var h=Math.floor(ms/3600000),m=Math.floor(ms/60000)%60,s=Math.floor(ms/1000)%60;return pad(h,2)+':'+pad(m,2)+':'+pad(s,2)+sep+pad(ms%1000,3);}
+function toSub(c,fps){return '{1}{1}'+fps+'\n'+c.map(x=>'{'+Math.round(x.start*fps/1000)+'}{'+Math.round(x.end*fps/1000)+'}'+x.text.replace(/\n/g,'|')).join('\n')+'\n';}
+function toSrt(c){return c.map((x,i)=>(i+1)+'\n'+fmtT(x.start,',')+' --> '+fmtT(x.end,',')+'\n'+x.text).join('\n\n')+'\n';}
+function toVtt(c){return 'WEBVTT\n\n'+c.map(x=>fmtT(x.start,'.')+' --> '+fmtT(x.end,'.')+'\n'+x.text).join('\n\n')+'\n';}
+function convert(name,s,fmt,fps,ms){var c=shift(parse(name,s,fps),ms||0);return fmt==='srt'?toSrt(c):fmt==='vtt'?toVtt(c):toSub(c,fps);}
+function selfTest(){var r=[],ok=true;function eq(n,a,b){var p=a===b;ok=ok&&p;r.push((p?'✔ ':'✘ ')+n+(p?'':' got '+JSON.stringify(a)+' want '+JSON.stringify(b)));}
+ var srt='\uFEFF1\r\n00:00:01,000 --> 00:00:02,500\r\nمرحبا\r\n<i>عالم</i>\r\n';
+ eq('srt→sub 23.976',convert('a.srt',srt,'sub',23.976,0),'{1}{1}23.976\n{24}{60}مرحبا|عالم\n');
+ eq('vtt→sub 25',convert('a.vtt','WEBVTT\n\n00:01.000 --> 00:02.000\nhi\n','sub',25,0),'{1}{1}25\n{25}{50}hi\n');
+ var ass='[Script Info]\n[Events]\nFormat: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\nDialogue: 0,0:00:10.00,0:00:12.00,Default,,0,0,0,,{\\an8\\b1}سطر, أول\\Nثاني';
+ eq('ass→sub 30',convert('a.ass',ass,'sub',30,0),'{1}{1}30\n{300}{360}سطر, أول|ثاني\n');
+ eq('shift srt',convert('a.srt',srt,'srt',25,500),'1\n00:00:01,500 --> 00:00:03,000\nمرحبا\nعالم\n');
+ eq('sub→vtt',convert('a.sub','{1}{1}25\n{25}{50}a|b','vtt',25,0),'WEBVTT\n\n00:00:01.000 --> 00:00:02.000\na\nb\n');
+ return {ok:ok,log:r.join('\n')};}
+return {parse:parse,convert:convert,selfTest:selfTest};})();
+if(typeof module!=='undefined')module.exports=SubConv;
+</script>
+<script>
+var $=id=>document.getElementById(id),st=$('status'),out=$('out');
+function dl(name,text){var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:'text/plain;charset=utf-8'}));a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},2000);}
+$('files').onchange=()=>{st.textContent='تم اختيار '+$('files').files.length+' ملف.';};
+$('go').onclick=async()=>{var fs=[...$('files').files];if(!fs.length){st.innerHTML='<span class="bad">اختر ملفاً أولاً.</span>';return;}
+ var fmt=$('fmt').value,fps=parseFloat($('fps').value),ms=parseInt($('shift').value)||0;out.textContent='';
+ for(var i=0;i<fs.length;i++){var f=fs[i];try{var txt=await f.text();var res=SubConv.convert(f.name,txt,fmt,fps,ms);
+  var name=f.name.replace(/\.[^.]+$/,'')+(fmt===f.name.split('.').pop().toLowerCase()?'.converted':'')+'.'+fmt;dl(name,res);
+  out.textContent+='✔ '+name+'\n';st.textContent='جارٍ التنزيل '+(i+1)+'/'+fs.length;}catch(e){out.textContent+='✘ '+f.name+': '+e.message+'\n';}
+  await new Promise(r=>setTimeout(r,800));}
+ st.innerHTML='<span class="ok">تم ✔</span>';};
+$('test').onclick=()=>{var r=SubConv.selfTest();st.innerHTML=r.ok?'<span class="ok">نجح الاختبار الذاتي ✔</span>':'<span class="bad">فشل الاختبار ✘</span>';out.textContent=r.log;};
+</script></body></html>
