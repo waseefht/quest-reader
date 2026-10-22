@@ -8,6 +8,7 @@ fs.writeFileSync('overlay.js', ov);
 let min = ov; try { const t = await import('/tmp/pw/node_modules/terser/main.js'); min = (await t.minify(ov,{format:{ascii_only:true}})).code; } catch(e) { min = ov.replace(/\n/g,''); }
 fs.writeFileSync('bookmarklet.js', min + '\n');
 const reader = 'javascript:' + encodeURIComponent(min);
+const uni = 'javascript:' + encodeURIComponent('window.__QSR_HIDDEN=1;window.__QSR_UNI=1;' + min);
 const hidden = 'javascript:' + encodeURIComponent('window.__QSR_HIDDEN=1;' + min);
 const hiddenNT = 'javascript:' + encodeURIComponent('window.__QSR_HIDDEN=1;window.__QSR_NOTOAST=1;' + min);
 fs.writeFileSync('hidden-bookmarklet.js', 'window.__QSR_HIDDEN=1;' + min + '\n');
@@ -29,16 +30,20 @@ fs.writeFileSync('install.html', `<!doctype html><html lang="ar" dir="rtl"><head
 <li>غيّر الاسم (مثلاً «قارئ الترجمة») واحذف الرابط والصق الكود مكانه (يبدأ بـ <code>javascript:</code>) ثم احفظ.</li>
 <li>افتح موقع الفيلم، ثم افتح الإشارة من قائمة الإشارات ليعمل على الصفحة الحالية.</li></ol>
 <p class="hint">على الكمبيوتر يمكن سحب الزر الأخضر إلى شريط الإشارات مباشرة.</p></section>
+<section class="card" style="border:2px solid #2ea043"><h2>🎬 الدبلجة — الأداة الوحيدة التي تحتاجها</h2><p><b>ضغطة واحدة</b> على موقع الفيلم: تبدأ قراءة الترجمة بصوت نسائي «مدبلج» بلا أي واجهة، ويُخفَض صوت الفيديو أثناء الكلام ليبدو الصوت جزءًا من الفيلم. <b>اضغطها مرة ثانية خلال 3 ثوانٍ</b> لفتح الصندوق (اختيار منطقة الترجمة والإعدادات). ضغطة لاحقة = إيقاف. إعداداتك من الصفحة الرئيسية (الخفض، الدمج، الصوت المكاني، السرعة) تُضمَّن في الإضافة عند نسخها من هنا.</p>
+<div class="row"><a class="btn bm primary" id="uniA" href="${esc(uni)}" data-base="${esc(uni)}" style="font-size:1.4em">🎬 الدبلجة</a><button class="btn primary" onclick="cp(this)">📋 نسخ الكود</button></div>
+<textarea class="code" id="uniT" readonly>${esc(uni)}</textarea></section>
+<details class="card"><summary><h2 style="display:inline">⚙️ أدوات متقدمة (القديمة)</h2></summary>
 ${block('🔊 قارئ الترجمة', 'صندوق قابل للسحب وتغيير الحجم: ضعه فوق الترجمة فيُقرأ ما بداخله فقط (ترجمة VTT، YouTube، ترجمات نصية في الصفحة، وOCR اختياري). اضغطه مرة أخرى لإخفائه/إظهاره.', reader)}
 ${block('🔈 قارئ مخفي', 'ضغطة واحدة تبدأ قراءة الترجمة تلقائيًا بلا أي صندوق أو واجهة: مسارات ترجمة الفيديو وترجمات الصفحة في أي مكان، بصوت أنثوي تلقائي وبإعداداتك المحفوظة. يقول «تم التشغيل» مع إشعار صغير يختفي خلال 1.5 ثانية. اضغط الإشارة نفسها مرة أخرى للإيقاف («تم الإيقاف»). يعمل في ملء الشاشة.', hidden)}
 ${block('🔈 قارئ مخفي (بدون إشعار)', 'نفس القارئ المخفي لكن بدون الإشعار المرئي (التأكيد الصوتي فقط).', hiddenNT)}
 ${block('🌐 ترجمة الصفحة (Proxy)', 'ينقلك إلى نسخة مترجمة من Google (translate.goog) وتبقى الروابط مترجمة أثناء التصفح. يسألك عن اللغة (الافتراضي ar).', tProxy)}
 ${block('🌐 ترجمة داخل الصفحة', 'بديل للمواقع التي تفشل مع الـ Proxy (تسجيل دخول/مواقع ديناميكية): يحقن مترجم Google داخل الصفحة. قد تمنعه سياسة CSP في بعض المواقع.', tInpage)}
 ${block('🥽 افتح في VR', 'من Chrome/Edge المثبّت جانبيًا على Quest: يجد فيديو الصفحة (الأكبر/المشغّل، أو source، أو og:video) ويفتحه في مشغّل VR داخل Meta Quest Browser عبر Android intent، ويضيف زر «افتح في VR» فوق كل فيديو. أول مرة يسألك عن رابط مشغّل VR المستضاف (مثل https://USER.github.io/QuestReader/vr/index.html) ويحفظه. لتغييره: <code>localStorage.removeItem(\'qsr_vr_base\')</code>. يعمل فقط مع روابط ملفات مباشرة (mp4/webm/m3u8)، وليس blob/MSE/DRM. لم يُجرَّب على الجهاز.', vrBm)}
-</main><script>function cp(b){var t=b.parentNode.nextElementSibling;t.select();try{navigator.clipboard.writeText(t.value).then(function(){b.textContent='✅ تم النسخ';},function(){document.execCommand('copy');b.textContent='✅ تم النسخ';});}catch(e){document.execCommand('copy');b.textContent='✅ تم النسخ';}}</script></body></html>
+</details></main><script>(function(){try{var s=JSON.parse(localStorage.getItem('qr_state')||'{}'),d={};['duck','blend','rate'].forEach(function(k){if(s[k]!=null)d[k]=+s[k];});if(s.spatial!=null)d.spatial=!!s.spatial;if(s.voice&&/^g:/.test(s.voice))d.voice=s.voice;if(!Object.keys(d).length)return;var a=document.getElementById('uniA'),base=a.dataset.base,code='javascript:'+encodeURIComponent('window.__QSR_DEF='+JSON.stringify(d)+';'+decodeURIComponent(base.slice(11)));a.href=code;document.getElementById('uniT').value=code;}catch(e){}})();function cp(b){var t=b.parentNode.nextElementSibling;t.select();try{navigator.clipboard.writeText(t.value).then(function(){b.textContent='✅ تم النسخ';},function(){document.execCommand('copy');b.textContent='✅ تم النسخ';});}catch(e){document.execCommand('copy');b.textContent='✅ تم النسخ';}}</script></body></html>
 `);
 fs.copyFileSync('overlay.js','proxy/reader.txt');
 let rw = fs.readFileSync('proxy/rewrite.js','utf8').replace(/^export /gm,'');
 let wk = fs.readFileSync('proxy/worker.js','utf8').replace(/^import .*$/gm,'');
 fs.writeFileSync('proxy/worker-single.js', '// AUTO-GENERATED single file for Cloudflare dashboard paste-and-deploy (node build.mjs)\nconst READER = ' + JSON.stringify(ov) + ';\n' + rw + wk);
-console.log('bookmarklet chars:', reader.length, 'hidden:', hidden.length);
+console.log('uni:',uni.length,'bookmarklet chars:', reader.length, 'hidden:', hidden.length);

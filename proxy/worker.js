@@ -16,6 +16,11 @@ export default {
   async fetch(request) {
     const url = new URL(request.url), origin = url.origin;
     if (url.pathname === '/__reader.js') return new Response(READER, {headers:{'content-type':'application/javascript; charset=utf-8','cache-control':'max-age=3600','access-control-allow-origin':'*'}});
+    if (url.pathname === '/__tts') { // CORS-enabled TTS so the reader can route the voice through Web Audio
+      const q=(url.searchParams.get('q')||'').slice(0,200), tl=(url.searchParams.get('tl')||'ar').slice(0,10);
+      const r=await fetch('https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl='+encodeURIComponent(tl)+'&q='+encodeURIComponent(q));
+      return new Response(r.body,{status:r.status,headers:{'content-type':r.headers.get('content-type')||'audio/mpeg','access-control-allow-origin':'*','cache-control':'max-age=86400'}});
+    }
     let target = targetFrom(request.url);
     // UI mode: invisible by default; ?ui=box shows the box (remembered in a cookie)
     let ui = /(?:^|;\s*)qsr_ui=box/.test(request.headers.get('cookie')||'') ? 'box' : 'hidden', setUi = null;
@@ -42,7 +47,7 @@ export default {
     const ct = (res.headers.get('content-type')||'').toLowerCase();
     if (ct.includes('text/html')) {
       let rw = new HTMLRewriter()
-        .on('head', {element(e){ e.prepend('<script>window.__QSR_AUTO=1;'+(ui=='box'?'':'window.__QSR_HIDDEN=1;')+'</script><script src="'+origin+'/__reader.js" defer></script>', {html:true}); }})
+        .on('head', {element(e){ e.prepend('<script>window.__QSR_AUTO=1;window.__QSR_UNI=1;window.__QSR_TTSBASE="'+origin+'";'+(ui=='box'?'':'window.__QSR_HIDDEN=1;')+'</script><script src="'+origin+'/__reader.js" defer></script>', {html:true}); }})
         .on('meta[http-equiv]', {element(e){ if(/content-security-policy/i.test(e.getAttribute('http-equiv')||'')) e.remove(); }})
         .on('base[href]', {element(e){ e.setAttribute('href', proxify(e.getAttribute('href'), target.href, origin)); }});
       for (const [t,a] of ATTRS) rw = rw.on(t+'['+a+']', new AttrRW(a, target.href, origin));

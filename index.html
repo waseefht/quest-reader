@@ -2,13 +2,23 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#111418">
 <title>قارئ النصوص</title><link rel="manifest" href="manifest.json"><link rel="icon" href="icons/icon-192.png">
 <link rel="stylesheet" href="style.css"></head><body>
-<header><h1>🔊 قارئ النصوص والترجمات</h1><nav class="row"><a class="btn small primary" href="install.html">⭐ الإضافات (Bookmarklets)</a><a class="btn small primary" href="vr/index.html">🥽 مشغّل فيديو VR</a><a class="btn small" href="test.html">🎬 تجربة قراءة الترجمة</a></nav></header>
+<header><h1>🎬 الدبلجة — قارئ الترجمة بصوت نسائي</h1></header>
 <div id="nosupport" class="warn" hidden>عذرًا، هذا المتصفح لا يدعم تحويل النص إلى كلام (speechSynthesis). جرّب تحديث متصفح Quest أو متصفحًا آخر.</div>
-<main><section class="card"><h2>🌐 فتح موقع مع قارئ الترجمة تلقائيًا (عبر Worker)</h2>
+<main><section class="card" style="border:2px solid #2ea043"><h2>🚀 ابدأ</h2><div class="row">
+<a class="btn primary" style="font-size:1.3em" href="install.html">🎬 ثبّت إضافة «الدبلجة» (ضغطة واحدة)</a>
+<a class="btn" href="vr/index.html">🥽 مشغّل فيديو VR</a><a class="btn" href="test.html">🎬 تجربة</a></div>
+<p class="hint">ثبّت الإضافة مرة واحدة، ثم على أي موقع فيلم: ضغطة = دبلجة مخفية، ضغطتان سريعتان = الصندوق. احفظ الإعدادات أدناه <b>قبل</b> نسخ الإضافة لتُضمَّن فيها.</p></section>
+<section class="card settings"><h2>⚙️ الإعدادات</h2><label>الصوت (نسائي)<select id="voice"></select></label><p id="onlineNote" class="hint" hidden>🌐 لا توجد أصوات مدمجة في هذا المتصفح — يُستخدم صوت نسائي عبر الإنترنت.</p>
+<label>السرعة <span id="rateV"></span><input type="range" id="rate" min="0.5" max="2" step="0.1" value="1"></label>
+<label>خفض صوت الفيديو أثناء الكلام <span id="duckV"></span>%<input type="range" id="duck" min="0" max="100" value="75"></label>
+<label>الدمج مع صوت الفيديو (صدى خفيف/موازنة/مكان) <span id="blendV"></span>%<input type="range" id="blend" min="0" max="100" value="40"></label>
+<label><input type="checkbox" id="spatial" checked> صوت مكاني ودمج متقدم (حيث يسمح المتصفح)</label>
+<details class="hint"><summary>ℹ️ كيف يعمل «الدمج»؟ ولماذا صوت الإنترنت؟</summary>أثناء كل جملة يُخفَض صوت الفيديو تدريجيًا (150ms) ثم يعود، وتُضبط سرعة الكلام (0.9–1.6) لينتهي مع نهاية الجملة المترجمة. المؤثرات المتقدمة (صدى غرفة، موازنة، ضاغط، توجيه حسب مكان الفيديو، وخفض ترددات الأصوات الأصلية بدل خفض الصوت كله) تعمل فقط حين يسمح المتصفح بتمرير الصوت عبر Web Audio: عند الفتح عبر الـ Worker أو في مشغّل VR مع Worker. على المواقع العادية: خفض الصوت فقط. متصفح Quest غالبًا بلا أصوات مدمجة، لذا يُستخدم صوت نسائي عبر الإنترنت (Google، يرسل النص إليها). لا يتم استنساخ صوت الممثل.</details></section>
+<section class="card"><h2>🌐 فتح موقع مع قارئ الترجمة تلقائيًا (عبر Worker)</h2>
 <label>رابط الـ Worker<input type="url" id="workerUrl" placeholder="https://my-reader.xxx.workers.dev"></label>
 <label>رابط الموقع<input type="url" id="siteUrl" placeholder="https://example.com/video"></label>
 <button id="openProxy" class="btn primary">🚀 فتح عبر القارئ</button><p class="hint">راجع README لنشر الـ Worker مجانًا. للاستخدام الشخصي فقط.</p></section>
-<h2>📄 قراءة نص</h2>
+<details class="card"><summary><h2 style="display:inline">📄 أدوات أخرى: قراءة نص</h2></summary>
 <section id="editSec"><textarea id="txt" dir="auto" placeholder="الصق النص هنا أو اكتبه… / Paste text here"></textarea>
 <div class="row"><button id="doneBtn" class="btn primary">📖 عرض للقراءة بالإشارة</button>
 <label class="btn">📂 فتح ملف txt<input type="file" id="file" accept=".txt,text/plain" hidden></label></div></section>
@@ -16,11 +26,9 @@
 <div id="view" dir="auto"></div><div class="row"><button id="editBtn" class="btn">✏️ تعديل النص</button></div></section>
 <section class="row controls"><button id="readBtn" class="btn primary">▶️ قراءة الكل</button>
 <button id="pauseBtn" class="btn">⏸️ إيقاف مؤقت</button><button id="stopBtn" class="btn danger">⏹️ إيقاف</button></section>
-<section class="settings"><label>الصوت<select id="voice"></select></label><p id="onlineNote" class="hint" hidden>🌐 لا توجد أصوات مدمجة في هذا المتصفح — يُستخدم صوت نسائي عبر الإنترنت.</p><details class="hint"><summary>ℹ️ لماذا يُستخدم صوت الإنترنت؟</summary>متصفح Meta Quest لا يوفّر غالبًا أي صوت مدمج (قائمة الأصوات فارغة). عندها يتحوّل القارئ تلقائيًا بعد ~1.5 ثانية إلى صوت نسائي عبر الإنترنت (خدمة نطق Google Translate، بلا مفتاح) يُشغَّل كملف صوتي. يحتاج اتصالًا بالإنترنت، والنص يُرسَل إلى Google لنطقه. السرعة تعمل، أما «طبقة الصوت» فلا تؤثر عليه. إذا توفرت أصوات الجهاز يمكنك اختيارها من القائمة، ويُستخدم الآخر تلقائيًا عند فشل أحدهما.</details>
-<label><input type="checkbox" id="autoVoice" checked> اختيار الصوت تلقائيًا حسب لغة النص</label>
-<label>السرعة <span id="rateV"></span><input type="range" id="rate" min="0.5" max="2" step="0.1" value="1"></label>
+<section class="settings"><label><input type="checkbox" id="autoVoice" checked> اختيار الصوت تلقائيًا حسب لغة النص</label>
 <label>طبقة الصوت <span id="pitchV"></span><input type="range" id="pitch" min="0.5" max="2" step="0.1" value="1"></label>
-<label><input type="checkbox" id="dwell" checked> القراءة عند الإشارة والانتظار (600ms)</label></section>
+<label><input type="checkbox" id="dwell" checked> القراءة عند الإشارة والانتظار (600ms)</label></section></details>
 </main>
 <div id="bubble" hidden><button id="bPlay" aria-label="قراءة">▶️</button><button id="bStop" aria-label="إيقاف">⏹️</button><button id="bClose" aria-label="إغلاق">✕</button></div>
 <script src="tts-online.js"></script><script src="app.js"></script></body></html>

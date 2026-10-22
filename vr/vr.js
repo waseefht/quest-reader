@@ -8,9 +8,10 @@ const status=t=>$('status').textContent=t||'';
 let voices=[];const loadV=()=>{if(SS)voices=SS.getVoices();};if(SS){loadV();SS.addEventListener('voiceschanged',loadV);}
 const FEM=/female|woman|zira|samantha|aria|jenny|hoda|salma|zariyah|amira|laila|layla|mona|hala|karen|victoria|susan|google (us|uk english female)|sara/i;
 const detect=t=>{const a=(t.match(/[\u0600-\u06FF]/g)||[]).length,l=(t.match(/[A-Za-z]/g)||[]).length;return a>=l&&a>0?'ar':'en';};
-function pickVoice(lg){const m=voices.filter(v=>v.lang.toLowerCase().startsWith(lg));return m.find(v=>FEM.test(v.name))||m[0]||null;}
+function pickVoice(lg){const m=voices.filter(v=>v.lang.toLowerCase().startsWith(lg));return m.find(v=>FEM.test(v.name))||null;}
 const Q=window.QOTTS;if(Q)Q.waitVoices(SS,l=>{voices=l;if(!l.length)status('🌐 لا توجد أصوات مدمجة — يُستخدم صوت نسائي عبر الإنترنت');});
-let lastSaid='';function say(t){if(!st.speak||!t||t==lastSaid)return;lastSaid=t;const lg0=detect(t);if(!SS||!voices.length||!pickVoice(lg0)){if(SS)SS.cancel();Q.speak(t,{lang:lg0,rate:1.05});return;}const u=new SpeechSynthesisUtterance(t),lg=detect(t),v=pickVoice(lg);u.lang=v?v.lang:(lg=='ar'?'ar-SA':'en-US');if(v)u.voice=v;u.rate=1.05;u.onerror=e=>{if(e.error!='interrupted'&&e.error!='canceled')Q.speak(t,{lang:lg,rate:1.05});};Q.cancel();SS.cancel();SS.speak(u);}
+if(Q){let hs={};try{hs=JSON.parse(localStorage.getItem('qr_state')||'{}');}catch(e){}Q.cfg.duck=+(hs.duck??75);Q.cfg.blend=+(hs.blend??40);Q.cfg.spatial=hs.spatial!==false;if(hs.worker)Q.cfg.base=hs.worker;}
+let lastSaid='';function say(t,cue){if(!st.speak||!t||t==lastSaid)return;lastSaid=t;const lg0=detect(t);if(!SS||!voices.length||!pickVoice(lg0)){if(SS)SS.cancel();Q.speak(t,{lang:lg0,rate:1.05,video,cue});return;}const u=new SpeechSynthesisUtterance(t),lg=detect(t),v=pickVoice(lg);u.lang=v?v.lang:(lg=='ar'?'ar-SA':'en-US');if(v)u.voice=v;u.rate=cue?Q.fitRate(t,lg,cue.end-video.currentTime,1.05):1.05;u.onstart=()=>Q.duck(video,true);u.onend=()=>Q.duck(video,false);u.onerror=e=>{Q.duck(video,false);if(e.error!='interrupted'&&e.error!='canceled')Q.speak(t,{lang:lg,rate:1.05});};Q.cancel();SS.cancel();SS.speak(u);}
 // ---------- video ----------
 const video=document.createElement('video');video.crossOrigin='anonymous';video.playsInline=true;video.preload='auto';
 const tex=new THREE.VideoTexture(video);tex.colorSpace=THREE.SRGBColorSpace;
@@ -26,7 +27,7 @@ $('sfile').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileR
 function loadSubText(t){if(!/^\uFEFF?WEBVTT/.test(t))t=srtToVtt(t);
  [...video.querySelectorAll('track')].forEach(x=>x.remove());const el=document.createElement('track');el.kind='subtitles';el.default=true;el.src=URL.createObjectURL(new Blob([t],{type:'text/vtt'}));video.appendChild(el);
  track=el.track;track.mode='hidden';track.addEventListener('cuechange',onCue);status('✅ تم تحميل الترجمة');}
-function onCue(){const c=track.activeCues;let t='';for(let i=0;i<(c?c.length:0);i++)t+=(t?' ':'')+c[i].text;t=t.replace(/<[^>]*>/g,'').replace(/\s+/g,' ').trim();$('sub2d').textContent=t;drawSub(t);say(t);}
+function onCue(){const c=track.activeCues;let t='';for(let i=0;i<(c?c.length:0);i++)t+=(t?' ':'')+c[i].text;t=t.replace(/<[^>]*>/g,'').replace(/\s+/g,' ').trim();$('sub2d').textContent=t;drawSub(t);const c0=c&&c[0];say(t,c0?{start:c0.startTime,end:c0.endTime}:null);}
 // ---------- scene ----------
 const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(devicePixelRatio);renderer.xr.enabled=true;renderer.xr.setReferenceSpaceType('local');
 $('stage').appendChild(renderer.domElement);
