@@ -1,0 +1,35 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>عقلي — مساعد شخصي</title><link rel="manifest" href="manifest.json"><meta name="theme-color" content="#0d1117">
+<style>
+*{box-sizing:border-box}body{margin:0;background:#0d1117;color:#e6edf3;font:18px/1.6 system-ui,"Segoe UI",Tahoma,sans-serif}
+header{display:flex;gap:6px;padding:8px;background:#161b22;position:sticky;top:0;flex-wrap:wrap}
+button,.btn{background:#21262d;color:#e6edf3;border:1px solid #30363d;border-radius:12px;padding:12px 16px;font-size:18px;cursor:pointer}
+button.on,button.primary{background:#1f6feb;border-color:#1f6feb}button.rec{background:#da3633}
+main{padding:10px;max-width:900px;margin:auto}section{display:none}section.on{display:block}
+#log{min-height:50vh;padding-bottom:10px}.m{padding:10px 14px;border-radius:14px;margin:8px 0;white-space:pre-wrap}
+.u{background:#1f6feb33;margin-left:15%}.a{background:#21262d;margin-right:15%}.s{color:#8b949e;font-size:14px}
+textarea,input,select{width:100%;background:#0d1117;color:#e6edf3;border:1px solid #30363d;border-radius:10px;padding:10px;font-size:18px}
+.row{display:flex;gap:6px;align-items:stretch}.row textarea{flex:1}.card{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:10px;margin:8px 0}
+.note{background:#23863633;border:1px solid #238636;padding:8px;border-radius:10px;font-size:15px}label{display:block;margin-top:10px}
+</style></head><body>
+<header><button data-t="chat" class="on">💬 محادثة</button><button data-t="mem">🧠 الذاكرة</button><button data-t="kb">📚 المعرفة</button><button data-t="rem">⏰ تذكيرات وملاحظات</button><button data-t="set">⚙️ إعدادات</button></header>
+<main>
+<section id="chat" class="on"><div id="log"></div>
+<div class="row"><textarea id="q" rows="2" placeholder="احكي معي..."></textarea><button id="mic" title="تكلم">🎤</button><button id="send" class="primary">إرسال</button></div>
+<label><input type="checkbox" id="speak" style="width:auto"> اقرأ الردود بصوت</label></section>
+<section id="mem"><h2>شو بعرف عنك</h2><div class="row"><input id="newFact" placeholder="أضف معلومة"><button id="addFact">➕</button></div><div id="facts"></div></section>
+<section id="kb"><h2>المعرفة</h2><input type="file" id="files" multiple accept=".txt,.md,.pdf,.json,.csv">
+<label>أو الصق ملاحظة:</label><input id="ptitle" placeholder="العنوان"><textarea id="ptext" rows="4"></textarea><button id="addPaste" class="primary">حفظ وفهرسة</button>
+<div id="kbStatus" class="s"></div><div id="docs"></div></section>
+<section id="rem"><h2>تذكيرات</h2><div id="rems"></div><h2>ملاحظات</h2><div id="notes"></div></section>
+<section id="set"><h2>الإعدادات</h2><p class="note">🔒 المفتاح بيضل على جهازك بس (localStorage) وبينبعت مباشرة لمزوّد الـAPI، ما في أي سيرفر وسيط.</p>
+<label>مفتاح API</label><input id="key" type="password" placeholder="sk-...">
+<label>Base URL (متوافق مع OpenAI)</label><input id="base" placeholder="https://api.openai.com/v1">
+<label>النموذج</label><input id="model" placeholder="gpt-4o-mini">
+<label>صوت الرد</label><select id="ttsMode"><option value="auto">تلقائي (صوت الجهاز ثم OpenAI)</option><option value="device">صوت الجهاز</option><option value="openai">OpenAI TTS</option><option value="google">Google</option></select>
+<p><button id="save" class="primary">حفظ</button> <button id="notif">🔔 تفعيل الإشعارات</button></p>
+<h3>نسخة احتياطية</h3><button id="export">⬇️ تصدير JSON</button> <label class="btn" style="display:inline-block">⬆️ استيراد<input type="file" id="importB" accept=".json" hidden></label>
+<button id="wipe">🗑️ مسح الكل</button><p class="s" id="setStatus"></p></section>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" defer></script>
+<script src="core.js"></script><script src="app.js"></script></body></html>
