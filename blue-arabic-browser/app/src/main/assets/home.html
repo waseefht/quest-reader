@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>الصفحة الرئيسية</title>
+<style>
+@font-face{font-family:UI;src:url(/assets/ui-font.ttf)}
+*{box-sizing:border-box}body{margin:0;font-family:UI,'Noto Sans Arabic',sans-serif;background:linear-gradient(160deg,#0d47a1,#1565c0 40%,#e3f2fd 40.1%);min-height:100vh;color:#102030}
+header{color:#fff;text-align:center;padding:22px 12px 8px}header h1{margin:0;font-size:28px}header p{margin:6px 0 0;opacity:.9;font-size:14px}
+.wrap{max-width:1200px;margin:0 auto;padding:10px}
+.card{background:#fff;border-radius:16px;box-shadow:0 4px 18px rgba(0,0,0,.15);padding:14px;margin:12px 0}
+h2{font-size:18px;margin:2px 4px 10px;color:#0d47a1}
+.row{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;scroll-snap-type:x mandatory}
+.eng{flex:0 0 210px;scroll-snap-align:start;background:#f5f9ff;border:1px solid #d6e4ff;border-radius:12px;padding:8px}
+.eng label{display:block;font-weight:bold;font-size:15px;margin:0 2px 6px;color:#0d47a1}
+.eng form{display:flex;gap:4px}
+.eng input{flex:1;min-width:0;font:inherit;font-size:15px;padding:8px 10px;border:1px solid #b0c4de;border-radius:10px}
+.eng button{border:0;border-radius:10px;background:#1565c0;color:#fff;font:inherit;padding:0 10px}
+.all{display:flex;gap:8px}.all input{flex:1;font:inherit;font-size:17px;padding:12px 14px;border:2px solid #1565c0;border-radius:14px}
+.all button{border:0;border-radius:14px;background:#1565c0;color:#fff;font:inherit;font-size:16px;padding:0 16px}
+.opts{margin-top:8px;font-size:14px;display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
+.tile{display:block;text-decoration:none;color:#102030;background:#f5f9ff;border:1px solid #d6e4ff;border-radius:12px;padding:12px 8px;text-align:center;font-size:15px}
+.tile b{display:block;font-size:24px;margin-bottom:4px}
+.hint{font-size:13px;color:#456;margin:6px 4px 0}
+</style></head><body>
+<header><h1>متصفح بلو العربي</h1><p>كل المواقع بالعربية — ترجمة غامرة كاملة أو ثنائية اللغة</p></header>
+<div class="wrap">
+ <div class="card">
+  <h2>🔎 ابحث</h2>
+  <form class="all" id="allf"><input id="allq" placeholder="اكتب سؤالك أو بحثك…" autocomplete="off"><button>Google</button></form>
+  <div class="opts">افتح النتائج:
+   <label><input type="radio" name="m" value="" checked> حسب الإعداد</label>
+   <label><input type="radio" name="m" value="ar"> عربي كامل</label>
+   <label><input type="radio" name="m" value="bi"> ثنائي اللغة</label>
+   <label><input type="radio" name="m" value="off"> بدون ترجمة</label>
+  </div>
+ </div>
+ <div class="card">
+  <h2>🤖 محركات البحث بالذكاء الاصطناعي</h2>
+  <div class="row" id="ai"></div>
+  <p class="hint">اكتب في أي مربع ثم اضغط «اذهب». اسحب أفقياً لرؤية المزيد.</p>
+ </div>
+ <div class="card">
+  <h2>🌐 محركات البحث العادية</h2>
+  <div class="row" id="web"></div>
+ </div>
+ <div class="card">
+  <h2>⭐ اختصارات</h2>
+  <div class="tiles">
+   <a class="tile" href="/assets/quicklinks.html"><b>🔗</b>روابط سريعة</a>
+   <a class="tile" href="arblue://bookmarks"><b>📑</b>الإشارات المرجعية</a>
+   <a class="tile" data-u="https://www.bbc.com/news"><b>📰</b>BBC News</a>
+   <a class="tile" data-u="https://en.wikipedia.org/wiki/Main_Page"><b>📚</b>Wikipedia</a>
+   <a class="tile" data-u="https://www.reuters.com/"><b>🗞️</b>Reuters</a>
+   <a class="tile" data-u="https://www.reddit.com/"><b>💬</b>Reddit</a>
+   <a class="tile" data-u="https://news.ycombinator.com/"><b>🧑‍💻</b>Hacker News</a>
+   <a class="tile" data-u="https://www.youtube.com/"><b>▶️</b>YouTube</a>
+   <a class="tile" href="arblue://settings"><b>⚙️</b>الإعدادات</a>
+  </div>
+ </div>
+</div>
+<script>
+var AI=[["Perplexity","https://www.perplexity.ai/search?q={q}"],["ChatGPT","https://chatgpt.com/?q={q}"],["Grok","https://grok.com/?q={q}"],
+ ["Copilot","https://copilot.microsoft.com/?q={q}"],["NoTrack AI","https://notrack.ai/chat?q={q}"],["iAsk AI","https://iask.ai/?mode=question&q={q}"],
+ ["DuckDuckGo AI","https://duckduckgo.com/?q={q}&ia=chat"],["You.com","https://you.com/search?q={q}&tbm=youchat"],["Phind","https://www.phind.com/search?q={q}"]];
+var WEB=[["Google","https://www.google.com/search?q={q}"],["Bing","https://www.bing.com/search?q={q}"],["DuckDuckGo","https://duckduckgo.com/?q={q}"],
+ ["Yandex","https://yandex.com/search/?text={q}"],["Brave","https://search.brave.com/search?q={q}"],["Startpage","https://www.startpage.com/do/search?query={q}"],
+ ["Wikipedia","https://en.wikipedia.org/w/index.php?search={q}"],["YouTube","https://www.youtube.com/results?search_query={q}"]];
+function mode(){var r=document.querySelector('input[name=m]:checked');return r?r.value:'';}
+function open(u){var m=mode();location.href='arblue://open?u='+encodeURIComponent(u)+(m?'&m='+m:'');}
+function build(id,list){var box=document.getElementById(id);list.forEach(function(e){
+ var d=document.createElement('div');d.className='eng';
+ d.innerHTML='<label></label><form><input autocomplete="off" placeholder="اسأل '+e[0]+'…"><button>اذهب</button></form>';
+ d.querySelector('label').textContent=e[0];
+ d.querySelector('form').onsubmit=function(ev){ev.preventDefault();var q=this.querySelector('input').value.trim();if(q)open(e[1].replace('{q}',encodeURIComponent(q)));};
+ box.appendChild(d);});}
+build('ai',AI);build('web',WEB);
+document.getElementById('allf').onsubmit=function(ev){ev.preventDefault();var q=document.getElementById('allq').value.trim();if(q)open('https://www.google.com/search?q='+encodeURIComponent(q));};
+document.querySelectorAll('.tile[data-u]').forEach(function(a){a.href='#';a.onclick=function(ev){ev.preventDefault();open(a.dataset.u);};});
+</script></body></html>
